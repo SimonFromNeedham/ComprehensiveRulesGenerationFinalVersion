@@ -5,9 +5,9 @@ Description: Exhaustively generates logical rules in Disjunctive Normal Form (DN
 Performance:
 
 2 GHz Dual-Core Intel Core i5 on 10,000 data points with 100 features each:
-* 1 Feature combination: < 1 second
-* 2 Feature combination: ~ 10 seconds
-* 3 Feature combination: ~ 1 hour
+* 1 Feature Rules: < 1 second
+* 2 Feature Rules: ~ 10 seconds
+* 3 Feature Rules: ~ 1 hour
 
 Important Notes:
 1. Uses the Pool.multiprocessing library for parallelism
