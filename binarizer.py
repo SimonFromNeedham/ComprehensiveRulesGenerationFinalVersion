@@ -183,7 +183,10 @@ def binarize(df, column_name, unique_threshold, q, exceptions_threshold, numeric
                 return None
     
     one_hot.columns = list(map(add_equal_suffix,one_hot.columns))
-    
+
+    if column_name+"=nan" in one_hot:
+        one_hot.drop(column_name+"=nan", axis=1, inplace=True)
+
     return one_hot
 
 
