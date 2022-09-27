@@ -9,7 +9,6 @@
     4. Filter out similar models and record the results in an external Excel file """
 
 from loadData import load_data
-from binarizer import binarize_df
 from bestModels import find_best_model
 from beautifyFormulas import beautify_formulas
 
@@ -29,6 +28,10 @@ DROP_FEATURE = ["Number"]
 # Model settings
 SUBSET_SIZE = 2
 NUM_MODELS = 1000
+
+# Binarize settings
+DELETE_NANS = True
+NUM_BINS = 20
 
 # Parallel settings (-1 == sequential)
 NUM_THREADS = int(max(cpu_count()*.9, 1))
@@ -101,7 +104,25 @@ def main():
             df.drop(feature, axis=1, inplace=True)
 
         # Binarize the dataset and record the results
-        df = binarize_df(df)
+        for col in df.columns:
+            print(col)
+            vals = set(df[col].tolist())
+
+            if vals != {False, True}:
+                # Bin continuous variables
+                if len(vals) > NUM_BINS and (isinstance(next(iter(vals)), int) or
+                                             isinstance(next(iter(vals)), float)):
+                    df[col] = pd.cut(df[col], NUM_BINS)
+
+                # One hot encode the categorical variables
+                df = pd.get_dummies(df, [col+"="], "", columns=[col])
+
+        # Delete all null columns
+        if DELETE_NANS:
+            for col in df.columns:
+                if 'nan' in col or 'NULL' in col:
+                    df.drop(col, axis=1, inplace=True)
+
         df.to_pickle(pickle_file)
 
     # Generate training and testing data
@@ -141,7 +162,7 @@ def main():
 
     beautiful_forms = beautify_formulas(best_formulas, np.array(y_test), SUBSET_SIZE)
     models = pd.DataFrame(data=beautiful_forms, columns=['F1', 'TPR', 'FPR', 'FNR', 'TNR', 'Precision', 'Recall',
-                                                         'ROC AUC', 'Accuracy', 'Simple DNF', 'Summed DNF'])
+                                                         'ROC AUC', 'Accuracy', 'Simple DNF'])
     models.to_excel(INPUT_FILE + "Results.xlsx", index=False, freeze_panes=(1, 1))
 
 

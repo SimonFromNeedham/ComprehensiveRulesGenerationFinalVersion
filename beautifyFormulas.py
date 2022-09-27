@@ -139,10 +139,9 @@ def simplify(cols, expr, subset_size):
     return expr
 
 
-# Returns: [TPR, FPR, FNR, TNR, F1 Score, Simple DNF, Summed DNF]
+# Returns: [TPR, FPR, FNR, TNR, F1 Score, Simple DNF]
 def beautify_formulas(best_formulas, y_true, subset_size):
     results = []
-    sums = sums_generator(subset_size)
 
     for formula in best_formulas:
         res = [fastmetrics.fast_f1_score(y_true, formula[-2])]
@@ -157,13 +156,9 @@ def beautify_formulas(best_formulas, y_true, subset_size):
         # Create a fluid final expression
         cols = formula[1]
         simple_expr = formula[2]
-        summed_expr = find_sum(sums, simple_expr)
-
         simple_expr = simplify(cols, simple_expr, subset_size)
-        summed_expr = simplify(cols, summed_expr, subset_size)
 
         res.append(simple_expr)
-        res.append(summed_expr)
         results.append(res)
 
     return sorted(results, reverse=True)
